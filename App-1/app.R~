@@ -1,0 +1,96 @@
+library(shiny)
+library(sleuth)
+
+so <- sleuth_load(file.path("data/sleuth_object.so"))
+sleuth_table <- sleuth_results(so, 'reduced:full', 'lrt', show_all = FALSE)
+
+# Define UI -----
+ui <- fluidPage(
+    navbarPage("Differential analysis",
+        tabPanel("Results",
+            sidebarLayout(
+                sidebarPanel(
+                    helpText("Differential analysis results")
+                ),
+ 
+                mainPanel(DT::dataTableOutput("sleuth_results"))
+            )
+        ),
+
+        tabPanel("Bootstrap",
+            sidebarLayout(
+                sidebarPanel(
+                    selectInput("transcript",
+                        label = "Transcript",
+                        choices = sleuth_table[1],
+                        selected = "")	
+                ),
+        
+                mainPanel(plotOutput("bootstrap", width = "800px", height = "600px"))
+            )
+        ),
+
+        tabPanel("PCA",
+            sidebarLayout(
+                sidebarPanel(
+                    helpText("This is a PCA plot")
+                ),
+
+                mainPanel(plotOutput("pca", width = "800px", height = "600px"))
+            )
+        ),
+
+        tabPanel("Volcano",
+            sidebarLayout(
+                sidebarPanel(
+                    helpText("This is a volcano plot")
+                ),
+
+                mainPanel(plotOutput("volcano", width = "800px", height = "600px"))
+            )
+        ),
+
+        tabPanel("Loadings",
+            sidebarLayout(
+                sidebarPanel(
+                    helpText("Loadings plots show the transcripts that exhibit the most variability for each principal component"),
+                    selectInput("pc_choice",
+                        label = "Principal Component",
+                        choices = c(1, 2, 3, 4, 5),
+                        selected = "")	
+                ),
+
+                mainPanel(plotOutput("pc_loadings", width = "800px", height = "600px"))
+            )
+        )
+    )
+)
+
+
+# Define server logic -----
+server <- function(input, output) {
+    output$sleuth_results <- DT::renderDataTable({
+        sleuth_table
+    })
+
+    output$bootstrap <- renderPlot({
+        plot_bootstrap(so, input$transcript)
+    })
+
+    output$pca <- renderPlot({
+        plot_pca(so, color_by = "condition_1")
+    })
+
+    output$volcano <- renderPlot({
+        plot_volcano(so, "condition_1WT")
+    })
+
+    output$pc_loadings <- renderPlot({
+        plot_loadings(so, pc_input = as.numeric(input$pc_choice))
+        #plot_loadings(so)
+    })
+}
+
+
+# Run the app -----
+shinyApp(ui = ui, server = server)
