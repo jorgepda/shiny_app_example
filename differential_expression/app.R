@@ -13,7 +13,19 @@ ui <- fluidPage(
         tabPanel("Results",
             sidebarLayout(
                 sidebarPanel(
-                    helpText("Differential analysis results")
+                    helpText(h3("Differential analysis results"),
+			p("target_id: transcript name"),
+			p("pval: p-value of the chosen model"),
+			p("qval: false discovery rate adjusted p-vaue"),
+			p("b: beta value (effect size). Technically a biased estimator of the fold change"),
+			p("se_b: standard error of the beta"),
+			p("mean_obs: mean of natural log counts of observations"),
+			p("var_obs: variance of observation"),
+			p("tech_var: technical variance of observation from the bootstraps"),
+			p("sigma_sq: raw estimator of the variance once the technical variance has been reemoved"),
+			p("smooth_sigma_sq: smooth regression fit for the shrinkage estimation"),
+			p("final_sigma_sq: max(sigma_sq, smooth_sigma_sq); used for covariance estimation of beta")
+			)
                 ),
  
                 mainPanel(DT::dataTableOutput("sleuth_results"))
