@@ -3,8 +3,8 @@ library(sleuth)
 library(DT)
 
 so <- sleuth_load(file.path("data/sleuth_object.so"))
-sleuth_table <- sleuth_results(so, 'reduced:full', 'lrt', show_all = FALSE)
 wald_test <- colnames(design_matrix(so))[2]
+sleuth_table <- sleuth_results(so, wald_test, 'wt', show_all = FALSE)
 
 
 # Define UI -----
@@ -25,10 +25,11 @@ ui <- fluidPage(
 			p("sigma_sq: raw estimator of the variance once the technical variance has been reemoved"),
 			p("smooth_sigma_sq: smooth regression fit for the shrinkage estimation"),
 			p("final_sigma_sq: max(sigma_sq, smooth_sigma_sq); used for covariance estimation of beta")
-			)
+			),
+			checkboxGroupInput("show_vars", "Table columns to display", list("target_id", "pval", "qval", "b", "se_b", "mean_obs", "var_obs", "tech_var", "sigma_sq", "smooth_sigma_sq", "final_sigma_sq"),list("target_id", "qval", "b")) 
                 ),
  
-                mainPanel(DT::dataTableOutput("sleuth_results"))
+                mainPanel(DT::dataTableOutput("sleuth_results"), downloadButton("downloadData", "Download", "show_vars"))
             )
         ),
 
@@ -85,8 +86,15 @@ ui <- fluidPage(
 # Define server logic -----
 server <- function(input, output) {
     output$sleuth_results <- DT::renderDataTable({
-        sleuth_table
+        DT::datatable(sleuth_table[, input$show_vars, drop = FALSE])
     })
+
+    output$downloadData <- downloadHandler(
+        filename = "sleuth_results.csv",
+        content = function(file) {
+           write.csv(sleuth_table[, input$show_vars, drop = FALSE], file)
+        }  
+    )    
 
     output$bootstrap <- renderPlot({
         plot_bootstrap(so, input$transcript)
