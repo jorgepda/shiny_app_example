@@ -1,0 +1,10 @@
+name: differential_expression
+title:
+username:
+account: jorgepda
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 330970
+bundleId: 1343576
+url: https://jorgepda.shinyapps.io/differential_expression/
+when: 1524848234.66289
