@@ -1,9 +1,11 @@
 library(shiny)
 library(sleuth)
 library(DT)
+library(plotly)
 
 so <- sleuth_load(file.path("data/sleuth_object.so"))
 wald_test <- colnames(design_matrix(so))[2]
+condition <- colnames(so$sample_to_covariates)[2]
 sleuth_table <- sleuth_results(so, wald_test, 'wt', show_all = FALSE)
 
 
@@ -52,10 +54,10 @@ ui <- fluidPage(
         tabPanel("PCA",
             sidebarLayout(
                 sidebarPanel(
-                    helpText("This is a PCA plot")
+                    helpText("Hover over each point to know its corresponding sample.")
                 ),
 
-                mainPanel(plotOutput("pca", width = "800px", height = "600px"))
+                mainPanel(plotlyOutput("pca", width = "800px", height = "600px"))
             )
         ),
 
@@ -103,8 +105,10 @@ server <- function(input, output) {
         plot_bootstrap(so, input$transcript)
     })
 
-    output$pca <- renderPlot({
-        plot_pca(so, color_by = "condition_1")
+    output$pca <- renderPlotly({
+        p <- plot_pca(so, color_by = condition)
+        p <- p + aes(text=paste0("Sample: ", sample))
+        ggplotly(p, tooltip="text")
     })
 
     output$volcano <- renderPlot({
@@ -113,7 +117,6 @@ server <- function(input, output) {
 
     output$pc_loadings <- renderPlot({
         plot_loadings(so, pc_input = as.numeric(input$pc_choice))
-        #plot_loadings(so)
     })
 }
 
