@@ -25,11 +25,14 @@ ui <- fluidPage(
 			p("sigma_sq: raw estimator of the variance once the technical variance has been reemoved"),
 			p("smooth_sigma_sq: smooth regression fit for the shrinkage estimation"),
 			p("final_sigma_sq: max(sigma_sq, smooth_sigma_sq); used for covariance estimation of beta")
-			),
-			checkboxGroupInput("show_vars", "Table columns to display", list("target_id", "pval", "qval", "b", "se_b", "mean_obs", "var_obs", "tech_var", "sigma_sq", "smooth_sigma_sq", "final_sigma_sq"),list("target_id", "qval", "b")) 
+		    ),
+		    checkboxGroupInput("show_vars", "Table columns to display", list("target_id", "pval", "qval", "b", "se_b", "mean_obs", "var_obs", "tech_var", "sigma_sq", "smooth_sigma_sq", "final_sigma_sq"),list("target_id", "qval", "b")) 
                 ),
  
-                mainPanel(DT::dataTableOutput("sleuth_results"), downloadButton("downloadData", "Download", "show_vars"))
+                mainPanel(
+                    DT::dataTableOutput("sleuth_results"),
+                    downloadButton("downloadData", "Download", "show_vars")
+                )
             )
         ),
 
@@ -86,13 +89,13 @@ ui <- fluidPage(
 # Define server logic -----
 server <- function(input, output) {
     output$sleuth_results <- DT::renderDataTable({
-        DT::datatable(sleuth_table[, input$show_vars, drop = FALSE])
+        DT::datatable(sleuth_table[, input$show_vars, drop = FALSE], filter = 'top')
     })
 
     output$downloadData <- downloadHandler(
         filename = "sleuth_results.csv",
         content = function(file) {
-           write.csv(sleuth_table[, input$show_vars, drop = FALSE], file)
+           write.csv(sleuth_table[input[["sleuth_results_rows_all"]], input$show_vars, drop = FALSE], file)
         }  
     )    
 
