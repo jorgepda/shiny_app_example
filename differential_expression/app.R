@@ -67,7 +67,7 @@ ui <- fluidPage(
                     helpText("This is a volcano plot")
                 ),
 
-                mainPanel(plotOutput("volcano", width = "800px", height = "600px"))
+                mainPanel(plotlyOutput("volcano", width = "800px", height = "600px"))
             )
         ),
 
@@ -111,8 +111,10 @@ server <- function(input, output) {
         ggplotly(p, tooltip="text")
     })
 
-    output$volcano <- renderPlot({
-        plot_volcano(so, wald_test)
+    output$volcano <- renderPlotly({
+        p <- plot_volcano(so, wald_test)
+        p <- p + aes(text=paste0("Target_id: ", target_id))
+        ggplotly(p, tooltip="text")
     })
 
     output$pc_loadings <- renderPlot({
