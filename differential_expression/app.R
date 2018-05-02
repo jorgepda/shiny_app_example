@@ -2,6 +2,7 @@ library(shiny)
 library(sleuth)
 library(DT)
 library(plotly)
+library(data.table)
 
 so <- sleuth_load(file.path("data/sleuth_object.so"))
 wald_test <- colnames(design_matrix(so))[2]
