@@ -64,7 +64,7 @@ ui <- fluidPage(
         tabPanel("Volcano",
             sidebarLayout(
                 sidebarPanel(
-                    helpText("This is a volcano plot")
+                    textInput("target_id", "Search for transcript")
                 ),
 
                 mainPanel(plotlyOutput("volcano", width = "800px", height = "600px"))
@@ -108,12 +108,15 @@ server <- function(input, output) {
     output$pca <- renderPlotly({
         p <- plot_pca(so, color_by = condition)
         p <- p + aes(text=paste0("Sample: ", sample))
-        ggplotly(p, tooltip="text")
+        p <- ggplotly(p, tooltip="text")
     })
 
     output$volcano <- renderPlotly({
         p <- plot_volcano(so, wald_test)
         p <- p + aes(text=paste0("Target_id: ", target_id))
+	if(!is.null(input$target_id) && input$target_id != "") {
+            p$data <- p$data %>% filter(target_id %like% input$target_id)
+        }
         p$data$significant <- as.character(p$data$significant)
         ggplotly(p, tooltip="text")
     })
