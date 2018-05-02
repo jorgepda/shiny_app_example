@@ -114,6 +114,7 @@ server <- function(input, output) {
     output$volcano <- renderPlotly({
         p <- plot_volcano(so, wald_test)
         p <- p + aes(text=paste0("Target_id: ", target_id))
+        p$data$significant <- as.character(p$data$significant)
         ggplotly(p, tooltip="text")
     })
 
