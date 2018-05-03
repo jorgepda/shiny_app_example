@@ -8,7 +8,10 @@ so <- sleuth_load(file.path("data/sleuth_object.so"))
 wald_test <- colnames(design_matrix(so))[2]
 condition <- colnames(so$sample_to_covariates)[2]
 sleuth_table <- sleuth_results(so, wald_test, 'wt', show_all = FALSE)
-
+default_columns <- c("target_id", "qval", "b")
+if("ens_gene" %in% colnames(sleuth_table)){
+    default_columns <- c(default_columns, "ens_gene")
+} 
 
 # Define UI -----
 ui <- fluidPage(
@@ -27,9 +30,12 @@ ui <- fluidPage(
 			p("tech_var: technical variance of observation from the bootstraps"),
 			p("sigma_sq: raw estimator of the variance once the technical variance has been reemoved"),
 			p("smooth_sigma_sq: smooth regression fit for the shrinkage estimation"),
-			p("final_sigma_sq: max(sigma_sq, smooth_sigma_sq); used for covariance estimation of beta")
+			p("final_sigma_sq: max(sigma_sq, smooth_sigma_sq); used for covariance estimation of beta"),
+                        p("If gene names were added, then"),
+                        p("ens_gene: gene name in ensembl"),
+                        p("ext_gene: external gene name")
 		    ),
-		    checkboxGroupInput("show_vars", "Table columns to display", list("target_id", "pval", "qval", "b", "se_b", "mean_obs", "var_obs", "tech_var", "sigma_sq", "smooth_sigma_sq", "final_sigma_sq"),list("target_id", "qval", "b")) 
+		    checkboxGroupInput("show_vars", "Table columns to display", colnames(sleuth_table), default_columns) 
                 ),
  
                 mainPanel(
