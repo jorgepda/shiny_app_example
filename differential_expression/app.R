@@ -90,6 +90,16 @@ ui <- fluidPage(
 
                 mainPanel(plotOutput("pc_loadings", width = "800px", height = "600px"))
             )
+        ),
+
+        tabPanel("Sample Heatmap",
+            sidebarLayout(
+                sidebarPanel(
+                    helpText("This is a sample to sample heatmap or distance matrix.")
+                ),
+
+                mainPanel(plotOutput("heatmap", width = "800px", height = "600px"))
+            )
         )
     )
 )
@@ -118,18 +128,21 @@ server <- function(input, output) {
         p <- ggplotly(p, tooltip="text")
     })
 
+    volcano_p <- plot_volcano(so, wald_test)
+    volcano_p$data$significant <- as.character(volcano_p$data$significant)
     output$volcano <- renderPlotly({
-        p <- plot_volcano(so, wald_test)
-        p <- p + aes(text=paste0("Target_id: ", target_id))
 	if(!is.null(input$target_id) && input$target_id != "") {
-            p$data <- p$data %>% filter(target_id %like% input$target_id)
+            volcano_p$data <- volcano_p$data %>% filter(target_id %like% input$target_id)
         }
-        p$data$significant <- as.character(p$data$significant)
-        ggplotly(p, tooltip="text")
+	plot_ly(volcano_p$data, x=~b, y=~-log10(qval), type="scattergl", color=~significant, colors=c("black", volcano_p$plot_env$sig_color), alpha=volcano_p$plot_env$point_alpha, text=~target_id, hoverinfo = 'text')
     })
 
     output$pc_loadings <- renderPlot({
         plot_loadings(so, pc_input = as.numeric(input$pc_choice))
+    })
+
+    output$heatmap <- renderPlot({
+        plot_sample_heatmap(so)
     })
 }
 
