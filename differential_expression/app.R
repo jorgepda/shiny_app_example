@@ -51,7 +51,10 @@ ui <- fluidPage(
                     selectInput("transcript",
                         label = "Transcript",
                         choices = sleuth_table[1],
-                        selected = "")	
+                        selected = ""),
+		    if("ext_gene" %in% colnames(sleuth_table)){
+                        checkboxInput("show_genes", "Show genes", value = FALSE)	
+                    }
                 ),
         
                 mainPanel(plotOutput("bootstrap", width = "800px", height = "600px"))
@@ -119,7 +122,13 @@ server <- function(input, output) {
     )    
 
     output$bootstrap <- renderPlot({
-        plot_bootstrap(so, input$transcript)
+        p <-plot_bootstrap(so, input$transcript)
+        if(input$show_genes) {
+            p$labels$subtitle <- sleuth_table[sleuth_table$target_id == input$transcript, ]$ext_gene
+        } else {
+            p$labels$subtitle <- NULL
+        }
+        p
     })
 
     output$pca <- renderPlotly({
