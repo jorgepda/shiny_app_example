@@ -3,5 +3,7 @@ Example of Shiny app using results from sleuth
 To launch the app, launch R, then
 ```
 library(shiny)
-runApp("App-1")
+runApp("differential_expression")
 ```
+
+A live version of the app deployed on shiny-apps is available [here](https://dnalc.shinyapps.io/perezde3873261/)
