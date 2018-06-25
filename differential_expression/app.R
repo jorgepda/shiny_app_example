@@ -8,9 +8,22 @@ so <- sleuth_load(file.path("data/sleuth_object.so"))
 wald_test <- colnames(design_matrix(so))[2]
 condition <- colnames(so$sample_to_covariates)[2]
 sleuth_table <- sleuth_results(so, wald_test, 'wt', show_all = FALSE)
+table_columns <- c("target_id: transcript name" = "target_id",
+    "pval: p-value of the chosen model" = "pval",
+    "qval: false discovery rate adjusted p-vaue" = "pval",
+    "b: beta value (effect size). Technically a biased estimator of the fold change" = "b",
+    "se_b: standard error of the beta" = "se_b",
+    "mean_obs: mean of natural log counts of observations" = "mean_obs",
+    "var_obs: variance of observation" = "var_obs",
+    "tech_var: technical variance of observation from the bootstraps" = "tech_var",
+    "sigma_sq: raw estimator of the variance once the technical variance has been reemoved" = "sigma_sq",
+    "smooth_sigma_sq: smooth regression fit for the shrinkage estimation" = "smooth_sigma_sq",
+    "final_sigma_sq: max(sigma_sq, smooth_sigma_sq); used for covariance estimation of beta" = "final_sigma_sq")
 default_columns <- c("target_id", "qval", "b")
 if("ens_gene" %in% colnames(sleuth_table)){
-    default_columns <- c(default_columns, "ens_gene")
+    table_columns <- c(table_columns,c("ens_gene: gene name in ensembl" = "ens_gene",
+    	"ext_gene: external gene name" = "ext_gene"))
+    default_columns <- c(default_columns, "ext_gene")
 } 
 
 # Define UI -----
@@ -19,23 +32,25 @@ ui <- fluidPage(
         tabPanel("Results",
             sidebarLayout(
                 sidebarPanel(
-                    helpText(h3("Differential analysis results"),
-			p("target_id: transcript name"),
-			p("pval: p-value of the chosen model"),
-			p("qval: false discovery rate adjusted p-vaue"),
-			p("b: beta value (effect size). Technically a biased estimator of the fold change"),
-			p("se_b: standard error of the beta"),
-			p("mean_obs: mean of natural log counts of observations"),
-			p("var_obs: variance of observation"),
-			p("tech_var: technical variance of observation from the bootstraps"),
-			p("sigma_sq: raw estimator of the variance once the technical variance has been reemoved"),
-			p("smooth_sigma_sq: smooth regression fit for the shrinkage estimation"),
-			p("final_sigma_sq: max(sigma_sq, smooth_sigma_sq); used for covariance estimation of beta"),
-                        p("If gene names were added, then"),
-                        p("ens_gene: gene name in ensembl"),
-                        p("ext_gene: external gene name")
-		    ),
-		    checkboxGroupInput("show_vars", "Table columns to display", colnames(sleuth_table), default_columns) 
+                    helpText(h3("Differential analysis resuts")),
+		    #checkboxGroupInput("show_vars", "Table columns to display", colnames(sleuth_table), default_columns), 
+		    checkboxGroupInput("show_vars", "Table columns to display", table_columns, default_columns) 
+                    #helpText(
+		#	p("target_id: transcript name"),
+		#	p("pval: p-value of the chosen model"),
+		#	p("qval: false discovery rate adjusted p-vaue"),
+		#	p("b: beta value (effect size). Technically a biased estimator of the fold change"),
+		#	p("se_b: standard error of the beta"),
+		#	p("mean_obs: mean of natural log counts of observations"),
+		#	p("var_obs: variance of observation"),
+		#	p("tech_var: technical variance of observation from the bootstraps"),
+		#	p("sigma_sq: raw estimator of the variance once the technical variance has been reemoved"),
+		#	p("smooth_sigma_sq: smooth regression fit for the shrinkage estimation"),
+		#	p("final_sigma_sq: max(sigma_sq, smooth_sigma_sq); used for covariance estimation of beta"),
+                 #       p("If gene names were added, then"),
+                  #      p("ens_gene: gene name in ensembl"),
+                  #      p("ext_gene: external gene name")
+		  #  )
                 ),
  
                 mainPanel(
