@@ -33,24 +33,7 @@ ui <- fluidPage(
             sidebarLayout(
                 sidebarPanel(
                     helpText(h3("Differential analysis resuts")),
-		    #checkboxGroupInput("show_vars", "Table columns to display", colnames(sleuth_table), default_columns), 
 		    checkboxGroupInput("show_vars", "Table columns to display", table_columns, default_columns) 
-                    #helpText(
-		#	p("target_id: transcript name"),
-		#	p("pval: p-value of the chosen model"),
-		#	p("qval: false discovery rate adjusted p-vaue"),
-		#	p("b: beta value (effect size). Technically a biased estimator of the fold change"),
-		#	p("se_b: standard error of the beta"),
-		#	p("mean_obs: mean of natural log counts of observations"),
-		#	p("var_obs: variance of observation"),
-		#	p("tech_var: technical variance of observation from the bootstraps"),
-		#	p("sigma_sq: raw estimator of the variance once the technical variance has been reemoved"),
-		#	p("smooth_sigma_sq: smooth regression fit for the shrinkage estimation"),
-		#	p("final_sigma_sq: max(sigma_sq, smooth_sigma_sq); used for covariance estimation of beta"),
-                 #       p("If gene names were added, then"),
-                  #      p("ens_gene: gene name in ensembl"),
-                  #      p("ext_gene: external gene name")
-		  #  )
                 ),
  
                 mainPanel(
@@ -69,7 +52,8 @@ ui <- fluidPage(
                         selected = ""),
 		    if("ext_gene" %in% colnames(sleuth_table)){
                         checkboxInput("show_genes", "Show genes", value = FALSE)	
-                    }
+                    },
+                    helpText(p("Boxplots showing transcript abundances and technical variation for each sample"))
                 ),
         
                 mainPanel(plotOutput("bootstrap", width = "800px", height = "600px"))
@@ -138,7 +122,7 @@ server <- function(input, output) {
 
     output$bootstrap <- renderPlot({
         p <-plot_bootstrap(so, input$transcript)
-        if(input$show_genes) {
+        if("ext gene" %in% colnames(sleuth_table) && input$show_genes) {
             p$labels$subtitle <- sleuth_table[sleuth_table$target_id == input$transcript, ]$ext_gene
         } else {
             p$labels$subtitle <- NULL
