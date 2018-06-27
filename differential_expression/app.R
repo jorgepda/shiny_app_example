@@ -3,11 +3,15 @@ library(sleuth)
 library(DT)
 library(plotly)
 library(data.table)
+library(dplyr)
 
 so <- sleuth_load(file.path("data/sleuth_object.so"))
 wald_test <- colnames(design_matrix(so))[2]
 condition <- colnames(so$sample_to_covariates)[2]
 sleuth_table <- sleuth_results(so, wald_test, 'wt', show_all = FALSE)
+#sleuth_table %>% 
+# mutate_if(is.numeric, round, digits = 5)
+sleuth_table <- data.frame(lapply(sleuth_table, function(y) if(is.numeric(y)) signif(y, 5) else y))
 table_columns <- c("target_id: transcript name" = "target_id",
     "pval: p-value of the chosen model" = "pval",
     "qval: false discovery rate adjusted p-vaue" = "pval",
