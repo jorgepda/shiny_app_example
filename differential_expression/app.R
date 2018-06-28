@@ -67,7 +67,13 @@ ui <- fluidPage(
         tabPanel("PCA",
             sidebarLayout(
                 sidebarPanel(
-                    helpText("Hover over each point to know its corresponding sample.")
+                    helpText(
+                        h3("Principal Component Analysis"),
+                        p("This plot projects the samples onto the principal components.
+                            PCA analysis is useful for finding hidden patterns in the data. This is achieved by finding the features that explain the greatest amount of variance in the data.
+                        "),
+                        p("Hover over each point to know its corresponding sample.")
+                    )
                 ),
 
                 mainPanel(plotlyOutput("pca", width = "800px", height = "600px"))
