@@ -14,7 +14,7 @@ sleuth_table <- sleuth_results(so, wald_test, 'wt', show_all = FALSE)
 sleuth_table <- data.frame(lapply(sleuth_table, function(y) if(is.numeric(y)) signif(y, 5) else y))
 table_columns <- c("target_id: transcript name" = "target_id",
     "pval: p-value of the chosen model" = "pval",
-    "qval: false discovery rate adjusted p-vaue" = "qval",
+    "qval: false discovery rate adjusted p-value" = "qval",
     "b: beta value (effect size). Technically a biased estimator of the fold change" = "b",
     "se_b: standard error of the beta" = "se_b",
     "mean_obs: mean of natural log counts of observations" = "mean_obs",
@@ -89,7 +89,7 @@ ui <- fluidPage(
                         textInput("ext_gene", "Search by gene name")
                     },
                     
-                    p("Significant transcripts will tend to be located in the upper left or upper right parts of the plot.")
+                    p("Volcano plots are a great way to visualize fold change versus statistical significance. The x-axis represents ", tags$i("b"), " where ", tags$i("b"), " is the estimated fold change, while the y-axis is the ", tags$i("-log10(qval)"), "where qval is the false discovery rate adjusted statistical significance.", tags$br(), tags$br(), "Significant transcripts will tend to be located in the upper left or upper right parts of the plot.")
                 ),
 
                 mainPanel(plotlyOutput("volcano", width = "800px", height = "600px"))
