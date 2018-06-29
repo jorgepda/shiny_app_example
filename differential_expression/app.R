@@ -14,7 +14,7 @@ sleuth_table <- sleuth_results(so, wald_test, 'wt', show_all = FALSE)
 sleuth_table <- data.frame(lapply(sleuth_table, function(y) if(is.numeric(y)) signif(y, 5) else y))
 table_columns <- c("target_id: transcript name" = "target_id",
     "pval: p-value of the chosen model" = "pval",
-    "qval: false discovery rate adjusted p-vaue" = "pval",
+    "qval: false discovery rate adjusted p-vaue" = "qval",
     "b: beta value (effect size). Technically a biased estimator of the fold change" = "b",
     "se_b: standard error of the beta" = "se_b",
     "mean_obs: mean of natural log counts of observations" = "mean_obs",
@@ -68,9 +68,9 @@ ui <- fluidPage(
             sidebarLayout(
                 sidebarPanel(
                     helpText(
-                        h3("Principal Component Analysis"),
-                        p("This plot projects the samples onto the principal components.
-                            PCA analysis is useful for finding hidden patterns in the data. This is achieved by finding the features that explain the greatest amount of variance in the data.
+                        h3("Principal Component Analysis (PCA)"),
+                        p("This plot projects the samples onto the two first principal components.
+                            PCA analysis is useful for finding hidden patterns in the data. This is achieved by finding the features that explain the greatest amount of variance in the data, or intuitively, the features that contain the most 'information'. 
                         "),
                         p("Hover over each point to know its corresponding sample.")
                     )
@@ -83,7 +83,13 @@ ui <- fluidPage(
         tabPanel("Volcano",
             sidebarLayout(
                 sidebarPanel(
-                    textInput("target_id", "Search for transcript")
+                    helpText(h3("Volcano Plot")),
+                    textInput("target_id", "Search by transcript"),
+		    if("ext_gene" %in% colnames(sleuth_table)){
+                        textInput("ext_gene", "Search by gene name")
+                    },
+                    
+                    p("Significant transcripts will tend to be located in the upper left or upper right parts of the plot.")
                 ),
 
                 mainPanel(plotlyOutput("volcano", width = "800px", height = "600px"))
@@ -149,10 +155,23 @@ server <- function(input, output) {
     volcano_p <- plot_volcano(so, wald_test)
     volcano_p$data$significant <- as.character(volcano_p$data$significant)
     output$volcano <- renderPlotly({
+        if(!is.null(input$ext_gene) && input$ext_gene != "") {
+            volcano_p$data <- volcano_p$data %>% filter(ext_gene %like% input$ext_gene)
+        }
 	if(!is.null(input$target_id) && input$target_id != "") {
             volcano_p$data <- volcano_p$data %>% filter(target_id %like% input$target_id)
         }
-	plot_ly(volcano_p$data, x=~b, y=~-log10(qval), type="scattergl", color=~significant, colors=c("black", volcano_p$plot_env$sig_color), alpha=volcano_p$plot_env$point_alpha, text=~target_id, hoverinfo = 'text')
+        if("ext_gene" %in% colnames(sleuth_table)){
+            hover_text = ~paste('Transcript: ', target_id, '</br> Gene: ', ext_gene)
+        } else {
+            hover_text = ~paste('Transcript: ', target_id)
+        }
+	plot_ly(volcano_p$data, x=~b, y=~-log10(qval), 
+            type="scattergl", 
+            color=~significant, 
+            colors=c("black", volcano_p$plot_env$sig_color), 
+            alpha=volcano_p$plot_env$point_alpha, 
+            text=hover_text, hoverinfo = 'hover_text')
     })
 
     output$pc_loadings <- renderPlot({
