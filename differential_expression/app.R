@@ -100,7 +100,9 @@ ui <- fluidPage(
         tabPanel("Loadings",
             sidebarLayout(
                 sidebarPanel(
-                    helpText("Loadings plots show the transcripts that exhibit the most variability for each principal component"),
+                    helpText(h3("Loadings"),
+                        p("A loadings plot shows the transcripts that exhibit the most variability for each principal component.")
+                    ),
                     selectInput("pc_choice",
                         label = "Principal Component",
                         choices = c(1, 2, 3, 4, 5),
@@ -114,7 +116,10 @@ ui <- fluidPage(
         tabPanel("Sample Heatmap",
             sidebarLayout(
                 sidebarPanel(
-                    helpText("This is a sample to sample heatmap or distance matrix.")
+                    helpText(h3("Sample Heatmap"),
+                        p("This is a sample to sample heatmap based on the Jensen-Shannon Divergence."),
+                        p("The Jensen-Shannon Divergence is a measure of the similarity between to probability distributions.")
+                    )         
                 ),
 
                 mainPanel(plotOutput("heatmap", width = "800px", height = "600px"))
