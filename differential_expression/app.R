@@ -88,6 +88,7 @@ ui <- fluidPage(
 		    if("ext_gene" %in% colnames(sleuth_table)){
                         textInput("ext_gene", "Search by gene name")
                     },
+                    checkboxInput("filtered", "Use filtered results"),
                     
                     p("Volcano plots are a great way to visualize fold change versus statistical significance. The x-axis represents ", tags$i("b"), " where ", tags$i("b"), " is the estimated fold change, while the y-axis is the ", tags$i("-log10(qval)"), "where qval is the false discovery rate adjusted statistical significance.", tags$br(), tags$br(), "Significant transcripts will tend to be located in the upper left or upper right parts of the plot.")
                 ),
@@ -125,6 +126,7 @@ ui <- fluidPage(
 
 # Define server logic -----
 server <- function(input, output) {
+
     output$sleuth_results <- DT::renderDataTable({
         DT::datatable(sleuth_table[, input$show_vars, drop = FALSE], filter = 'top')
     })
@@ -155,6 +157,12 @@ server <- function(input, output) {
     volcano_p <- plot_volcano(so, wald_test)
     volcano_p$data$significant <- as.character(volcano_p$data$significant)
     output$volcano <- renderPlotly({
+        if(input$filtered){
+            filtered_transcripts <- input$sleuth_results_rows_all
+            filtered_data <- volcano_p$data[filtered_transcripts,]
+            volcano_p$data <- filtered_data
+        }
+
         if(!is.null(input$ext_gene) && input$ext_gene != "") {
             volcano_p$data <- volcano_p$data %>% filter(ext_gene %like% input$ext_gene)
         }
