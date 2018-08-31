@@ -4,6 +4,7 @@ library(DT)
 library(plotly)
 library(data.table)
 library(dplyr)
+library(gridExtra)
 
 so <- sleuth_load(file.path("data/sleuth_object.so"))
 wald_test <- colnames(design_matrix(so))[2]
@@ -52,7 +53,7 @@ ui <- fluidPage(
                 sidebarPanel(
                     selectInput("transcript",
                         label = "Transcript",
-                        choices = sleuth_table[1],
+                        choices = sleuth_table$target_id,
                         selected = ""),
 		    if("ext_gene" %in% colnames(sleuth_table)){
                         checkboxInput("show_genes", "Show genes", value = FALSE)	
